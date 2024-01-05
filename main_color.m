@@ -14,7 +14,7 @@ clc
 close all    
 clear all   
 %% parameters
-cluster=3; % the number of clustering centers
+cluster=4; % the number of clustering centers
 se=3; % the parameter of structuing element used for morphological reconstruction
 w_size=3; % the size of fitlering window
 %% test a color image
@@ -28,5 +28,5 @@ tic
 Time1=toc;
 disp(strcat('running time is: ',num2str(Time1)))
 f_ori;
-f_seg=fcm_image_color(f_ori,U1);
+[f_seg,lab_image]=fcm_image_color(f_ori,U1);
 imshow(f_seg);

@@ -1,5 +1,5 @@
 % This function is only suitabe for color image
-function gx=fcm_image_color(f,U) 
+function [gx,imput_f]=fcm_image_color(f,U) 
 m=size(f,1);n=size(f,2);
 U=U';
 idx_f=zeros(m*n,1);
