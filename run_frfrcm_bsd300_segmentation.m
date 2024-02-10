@@ -1,43 +1,56 @@
 clearvars
 close all
-
+data_set = "bsd500";
+run_type = "test";
 if strcmp(getenv('computername'),'BENNYK')
-    bsdsRoot = 'C:\Users\Benny\MATLAB\Projects\AF-graph\BSD';
-    addpath C:\Users\Benny\MATLAB\Projects\Segmentation-Using-Superpixels\others
-    addpath C:\Users\Benny\MATLAB\Projects\Segmentation-Using-Superpixels\evals
-
+    base_ssp_path = 'C:\Users\Benny\MATLAB\Projects\Segmentation-Using-Superpixels';
+    if data_set=="bsd300"
+        bsdsRoot = 'C:\Users\Benny\MATLAB\Projects\AF-graph\BSD';
+    end
+    data_dir = "C:\Study\runs\bsd\test\4_funcs_FH_rgb_0.8_300_250_120";
 else
-    bsdsRoot = 'D:\MATLAB\github\AF-graph\BSD';
-    addpath D:\MATLAB\github\Segmentation-Using-Superpixels\others
-    addpath D:\MATLAB\github\Segmentation-Using-Superpixels\evals
+    base_ssp_path = 'D:\MATLAB\github\Segmentation-Using-Superpixels';
+    if data_set=="bsd300"
+        bsdsRoot = 'D:\MATLAB\github\AF-graph\BSD';
+    elseif data_set == "bsd500"
+        bsdsRoot = 'D:\DataSet\BSD\500\BSDS500\data';
+        gt_seg_root = 'D:\DataSet\BSD\500\BSDS500\data\groundTruth';
+    end
+    data_dir = "D:\Study\runs\bsd500\results\test\4_funcs_FH_rgb_0.8_300_250";
 
 end
-fid = fopen('Nsegs.txt','r');
-Nimgs = 300; % number of images in BSDS300
-[BSDS_INFO] = fscanf(fid,'%d %d \n',[2,Nimgs]);
+addpath(fullfile(base_ssp_path,'others'))
+addpath(fullfile(base_ssp_path,'evals'))
+
+fid = fopen(sprintf('Nsegs_%s.txt',data_set),'r');
+[BSDS_INFO] = fscanf(fid,'%d %d \n');
 fclose(fid);
-run_type = "train";
-if run_type == "test"
-    Nimgs = 100;
-    test_ims_map = "ims_map_test.txt";
-    fid = fopen(test_ims_map);
-    test_ims_map_data = cell2mat(textscan(fid,'%f %*s'));
-    fclose(fid);
-    %%
-    BSDS_INFO = BSDS_INFO(:,ismember(BSDS_INFO(1,:),test_ims_map_data));
+BSDS_INFO = reshape(BSDS_INFO,2,[]);
+if data_set == "bsd300"
+    if run_type == "test"
+        Nimgs = 100;   
+    elseif run_type == "train"
+        Nimgs = 200;    
+    end
+elseif data_set == "bsd500"
+    if run_type == "test"
+        Nimgs = 200;   
+    elseif run_type == "train"
+        Nimgs = 300;    
+    end
 
-elseif run_type == "train"
-    Nimgs = 200;
-    train_ims_map = "ims_map_train.txt";
-    fid = fopen(train_ims_map);
-    test_ims_map_data = cell2mat(textscan(fid,'%f %*s'));
-    fclose(fid);
-    %%
-    BSDS_INFO = BSDS_INFO(:,ismember(BSDS_INFO(1,:),test_ims_map_data));
-
-else
-    Nimgs = 300;
 end
+
+ims_map = sprintf("ims_map_%s_%s.txt",run_type,data_set);
+fid = fopen(ims_map);
+ims_map_data = cell2mat(textscan(fid,'%f %*s'));
+fclose(fid);
+fid = fopen(ims_map,'rt');
+image_map = textscan(fid,'%s %s');
+fclose(fid);
+orig_ims_nums = image_map{1};
+new_ims_nums = image_map{2};
+BSDS_INFO = BSDS_INFO(:,ismember(BSDS_INFO(1,:),ims_map_data));
 
 Nimgs_inds = 1:Nimgs;
 Nimgs = length(Nimgs_inds);
